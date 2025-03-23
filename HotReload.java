@@ -8,10 +8,10 @@ import java.util.*;
 public class HotReload {
     private static final Long TIME_TO_COMPILE = 500L;
     private static final Map<Path, Long> lastTimeChanges = new HashMap<>();
-    private String RESET = "\u001B[0m";
-    private String RED = "\u001B[31m";
-    private String GREEN = "\u001B[32m";
-    private String YELLOW = "\u001B[33m";
+    private static String RESET = "\u001B[0m";
+    private static String RED = "\u001B[31m";
+    private static String GREEN = "\u001B[32m";
+    private static String YELLOW = "\u001B[33m";
 
     public static boolean isTimeToComple(Path file) {
         long currentTime = System.currentTimeMillis();
@@ -76,7 +76,7 @@ public class HotReload {
 
                         if (kind == StandardWatchEventKinds.ENTRY_MODIFY && changedFile.toString().endsWith(".java")) {
                             if (isTimeToComple(changedFile)) {
-                                System.out.println((YELLOW + "[INFO]:" + RESET + "File changed " + event.context());            
+                                System.out.println(YELLOW + "[INFO]:" + RESET + "File changed " + event.context());            
                                 compileProgram();
                             }
                         }
