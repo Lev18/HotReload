@@ -6,9 +6,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.*;
 
 public class HotReload {
-    public static final Long TIME_TO_COMPILE = 500L;
-    public static final Map<Path, Long> lastTimeChanges = new HashMap<>();
-    
+    private static final Long TIME_TO_COMPILE = 500L;
+    private static final Map<Path, Long> lastTimeChanges = new HashMap<>();
+    private String RESET = "\u001B[0m";
+    private String RED = "\u001B[31m";
+    private String GREEN = "\u001B[32m";
+    private String YELLOW = "\u001B[33m";
+
     public static boolean isTimeToComple(Path file) {
         long currentTime = System.currentTimeMillis();
         long lastTimeChange = lastTimeChanges.getOrDefault(file, 0L);
@@ -28,7 +32,7 @@ public class HotReload {
                        StandardWatchEventKinds.ENTRY_CREATE,
                        StandardWatchEventKinds.ENTRY_MODIFY);
                keyMap.put(key, dir);
-               System.out.println("[INFO]:📂 Watching directory: " + dir);
+               System.out.println(YELLOW + "[INFO]:" + RESET + "📂 Watching directory: " + dir);
 
                return FileVisitResult.CONTINUE;
            } 
@@ -37,12 +41,12 @@ public class HotReload {
 
     public static void compileProgram() {
         try {
-            System.out.println("[INFO]:⚡ Running maven compiler...");        
+            System.out.println(RED + "[INFO]:" + RESET + "⚡ Running maven compiler...");        
             Process process = new ProcessBuilder("mvn", "compile", "-T", "1C")
                 .inheritIO()
                 .start();
                 process.waitFor();
-                System.out.println("[INFO]: Compilation complete, waiting for new changes!! ");         
+                System.out.println(GREEN + "[INFO]:" + RESET + "Compilation completed, waiting for new changes!! ");         
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -60,7 +64,7 @@ public class HotReload {
             Map<WatchKey, Path> keyMap = new HashMap<>();
             registerAll(watchService, keyMap, watchingPath);
 
-            System.out.println("[INFO]: Scanning " + watchingPath.toString() + " for file changes");
+            System.out.println(YELLOW+ "[INFO]:" + RESET + " Scanning " + watchingPath.toString() + " for file changes");
 
             while (true) {
                 WatchKey key = watchService.poll(10, TimeUnit.SECONDS);
@@ -72,13 +76,13 @@ public class HotReload {
 
                         if (kind == StandardWatchEventKinds.ENTRY_MODIFY && changedFile.toString().endsWith(".java")) {
                             if (isTimeToComple(changedFile)) {
-                                System.out.println("[INFO]:" + "File changed " + event.context());            
+                                System.out.println((YELLOW + "[INFO]:" + RESET + "File changed " + event.context());            
                                 compileProgram();
                             }
                         }
                         else if (kind == StandardWatchEventKinds.ENTRY_CREATE) {
                             if (Files.isDirectory(changedFile)) {
-                                System.out.println("[INFO]:📂 Created new directory : " + changedFile);
+                                System.out.println(YELLOW + "[INFO]:" + RESET + "📂 Created new directory : " + changedFile);
                                 registerAll(watchService, keyMap, changedFile);
                             }
                         }
